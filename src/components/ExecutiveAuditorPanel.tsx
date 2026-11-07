@@ -142,7 +142,16 @@ export const ExecutiveAuditorPanel: React.FC<ExecutiveAuditorPanelProps> = ({
       });
 
       clearTimeout(timeoutId);
-      const data = await response.json();
+      const rawText = await response.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status} (${response.statusText || 'Error'}). Ensure GEMINI_API_KEY is configured in Vercel environment variables.`);
+        }
+      }
+
       if (!response.ok) {
         throw new Error(data.error || 'Server error occurred during audit.');
       }

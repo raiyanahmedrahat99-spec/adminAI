@@ -117,7 +117,15 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
         });
 
         clearTimeout(timeoutId);
-        const data: AiGeneratedProductMetadata & { error?: string; hint?: string } = await response.json();
+        const rawText = await response.text();
+        let data: (AiGeneratedProductMetadata & { error?: string; hint?: string }) = {} as any;
+        try {
+          data = JSON.parse(rawText);
+        } catch {
+          if (!response.ok) {
+            throw new Error(`Server returned ${response.status} (${response.statusText || 'Error'}). Ensure GEMINI_API_KEY is configured in Vercel.`);
+          }
+        }
 
         if (!response.ok || data.error) {
           const errorMsg = data.error || 'Server responded with an error';
